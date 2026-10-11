@@ -17,26 +17,30 @@ int main() {
         dp[i][0] = 0.0;
     }
     
-    // Fill DP table
-    for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= m; j++) {
-            if (j > i) continue; // Can't eat more apples than we have
-            
-            double sum = 0.0;
-            
-            // Sum over all possible amounts we can eat today
-            for (int k = 1; k <= i; k++) {
-                if (k <= j) {
-                    // We still need to eat j-k more apples from i-k apples
-                    sum += dp[i - k][j - k];
-                } else {
-                    // We've eaten more than needed, so we're done (0 more days needed)
-                    sum += 0.0;
+    // Fill DP table - need to be careful about order
+    // We need to fill in order of increasing total apples (i + j)
+    for (int total = 1; total <= n + m; total++) {
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (i + j != total) continue;
+                if (j > i) continue; // Can't eat more apples than we have
+                
+                double sum = 0.0;
+                
+                // Sum over all possible amounts we can eat today
+                for (int k = 1; k <= i; k++) {
+                    if (k <= j) {
+                        // We still need to eat j-k more apples from i-k apples
+                        sum += dp[i - k][j - k];
+                    } else {
+                        // We've eaten more than needed, so we're done (0 more days needed)
+                        sum += 0.0;
+                    }
                 }
+                
+                // E[i][j] = 1 + (1/i) * sum
+                dp[i][j] = 1.0 + sum / i;
             }
-            
-            // E[i][j] = 1 + (1/i) * sum
-            dp[i][j] = 1.0 + sum / i;
         }
     }
     
