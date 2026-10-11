@@ -23,16 +23,16 @@ int main() {
             if (j > i) continue; // Can't eat more apples than we have
             
             double sum = 0.0;
-            int max_eat = min(i, j);
             
             // Sum over all possible amounts we can eat today
-            for (int k = 1; k <= max_eat; k++) {
-                sum += dp[i - k][j - k];
-            }
-            
-            // Add the cases where we eat more than needed (k > j)
-            for (int k = max_eat + 1; k <= i; k++) {
-                sum += dp[i - k][0]; // We've already eaten all needed apples
+            for (int k = 1; k <= i; k++) {
+                if (k <= j) {
+                    // We still need to eat j-k more apples from i-k apples
+                    sum += dp[i - k][j - k];
+                } else {
+                    // We've eaten more than needed, so we're done (0 more days needed)
+                    sum += 0.0;
+                }
             }
             
             // E[i][j] = 1 + (1/i) * sum
