@@ -2,50 +2,55 @@
 #include <vector>
 #include <iomanip>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
+
+vector<vector<double>> memo;
+vector<vector<bool>> computed;
+
+double solve(int apples_left, int apples_to_eat) {
+    if (apples_to_eat == 0) return 0.0;
+    if (apples_left == 0) return 0.0;
+    if (apples_to_eat > apples_left) return 0.0; // Can't eat more than we have
+    
+    if (computed[apples_left][apples_to_eat]) {
+        return memo[apples_left][apples_to_eat];
+    }
+    
+    double sum = 0.0;
+    for (int k = 1; k <= apples_left; k++) {
+        if (k <= apples_to_eat) {
+            sum += solve(apples_left - k, apples_to_eat - k);
+        } else {
+            sum += 0.0; // We've eaten more than needed
+        }
+    }
+    
+    double result = 1.0 + sum / apples_left;
+    memo[apples_left][apples_to_eat] = result;
+    computed[apples_left][apples_to_eat] = true;
+    
+    return result;
+}
 
 int main() {
     int n, m;
     cin >> n >> m;
     
-    // DP table: E[i][j] = expected days to eat j more apples when we have i apples
-    vector<vector<double>> dp(n + 1, vector<double>(m + 1, 0.0));
+    memo.resize(n + 1, vector<double>(m + 1, 0.0));
+    computed.resize(n + 1, vector<bool>(m + 1, false));
     
-    // Base case: E[i][0] = 0 for all i (no more apples needed to eat)
+    // Initialize base cases
     for (int i = 0; i <= n; i++) {
-        dp[i][0] = 0.0;
+        memo[i][0] = 0.0;
+        computed[i][0] = true;
     }
     
-    // Fill DP table - need to be careful about order
-    // We need to fill in order of increasing total apples (i + j)
-    for (int total = 1; total <= n + m; total++) {
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                if (i + j != total) continue;
-                if (j > i) continue; // Can't eat more apples than we have
-                
-                double sum = 0.0;
-                
-                // Sum over all possible amounts we can eat today
-                for (int k = 1; k <= i; k++) {
-                    if (k <= j) {
-                        // We still need to eat j-k more apples from i-k apples
-                        sum += dp[i - k][j - k];
-                    } else {
-                        // We've eaten more than needed, so we're done (0 more days needed)
-                        sum += 0.0;
-                    }
-                }
-                
-                // E[i][j] = 1 + (1/i) * sum
-                dp[i][j] = 1.0 + sum / i;
-            }
-        }
-    }
+    double result = solve(n, m);
     
     // Output result with 2 decimal places
-    cout << fixed << setprecision(2) << dp[n][m] << endl;
+    cout << fixed << setprecision(2) << result << endl;
     
     return 0;
 }
